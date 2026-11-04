@@ -318,12 +318,15 @@ RUN apt-get update && apt-get install -y ddev
 ################################################################################
 
 USER root
+# GOGC=off: under QEMU emulation (amd64 build on Apple Silicon) the Go GC
+# crashes with "fatal error: lfstack.push". mkcert is short-lived, so no GC needed.
+ARG TARGETARCH=amd64
 RUN \
   apt-get update && apt-get install wget libnss3-tools -y \
-  && wget -O mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-amd64 \
-  && chmod +x  mkcert \
-  && mv mkcert /usr/local/bin \
-  && ./usr/local/bin/mkcert -install
+  && wget -O mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-linux-${TARGETARCH} \
+  && chmod +x mkcert \
+  && mv mkcert /usr/local/bin/mkcert \
+  && GOGC=off mkcert -install
 
 ################################################################################
 #
